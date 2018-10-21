@@ -79,7 +79,7 @@ class CoursesTeacherController extends Controller
             $course_image_name = time() . '.' . $request->course_image->getClientOriginalExtension();
         }
         if (!empty(request('course_video'))) {
-            $course_video_name = time()*2 . '.' . $request->course_video->getClientOriginalExtension();
+            $course_video_name = $request->course_video; //time()*2 . '.' . $request->course_video->getClientOriginalExtension();
         }
 
         $add = new Courses();
@@ -109,7 +109,7 @@ class CoursesTeacherController extends Controller
         }
         if (!empty(request('course_video'))) {
 
-            $request->course_video->move(public_path('uplaod/courses/coursesvideos/'), $course_video_name);
+//            $request->course_video->move(public_path('uplaod/courses/coursesvideos/'), $course_video_name);
         }
 
         $select = Courses::where('user_id', auth()->user()->id)->orderBy('created_at', 'desc')->first();
@@ -119,7 +119,7 @@ class CoursesTeacherController extends Controller
         $add->video_category = json_encode(request('video_category'));
         $add->video_url = json_encode(request('video_url'));
         $add->course_id = $select->id;
-        $add->save();       
+        $add->save();
 
         session()->flash('success', 'Successfully added');
         
