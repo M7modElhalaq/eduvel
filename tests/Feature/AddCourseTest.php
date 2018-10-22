@@ -42,6 +42,7 @@ class AddCourseTest extends TestCase
         $response->assertSessionHas('success');
 
         $course = Courses::latest()->first();
+
         $this->assertEquals($course->course_title, 'Persius delenit has cu');
         $this->assertEquals($course->teacher_name, 'Teacher name');
         $this->assertEquals($course->course_start, '2018-07-07');
