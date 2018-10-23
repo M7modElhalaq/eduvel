@@ -19,18 +19,17 @@ class CheckRole
         // if(Auth::check()){
             if($request->user() == null)
             {
-                return request('/login');
+                return redirect('/login');
             }
 
             $actions = $request->route()->getAction();
             $roles = isset($actions['roles']) ? $actions['roles'] : null;
-
-            if ($request->user()->hasAnyRole($roles) || !$roles) 
+            if ($request->user()->hasAnyRole($roles) || !$roles)
             {
                 return $next($request);
             }
         // }
 
-        return request('/login');
+        return redirect('/login');
     }
 }

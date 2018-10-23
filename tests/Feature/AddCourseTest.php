@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Courses;
+use App\Http\Middleware\VerifyCsrfToken;
 use App\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -13,9 +14,12 @@ class AddCourseTest extends TestCase
 {
     public function test_can_add_course()
     {
-        $this->actingAs(User::find(2));
+        Storage::fake();
+        $this->withoutMiddleware(VerifyCsrfToken::class);
 
-        $response = $this->post('dashboard/courses/store', [
+        $this->actingAs(User::find(1));
+
+        $response = $this->post('admin/courses/store', [
             'course_title' => 'Persius delenit has cu',
             'teacher_name' => 'Teacher name',
             'course_start' => '2018-07-07',
@@ -38,10 +42,11 @@ class AddCourseTest extends TestCase
             'video_url' => ["https://www.youtube.com/watch?v=LDgd_gUcqCw", "https://www.youtube.com/watch?v=LDgd_gUcqCw", "https://www.youtube.com/watch?v=LDgd_gUcqCw", "https://www.youtube.com/watch?v=LDgd_gUcqCw"],
         ]);
 
-        $response->assertRedirect('dashboard/courses');
-        $response->assertSessionHas('success');
-
         $course = Courses::latest()->first();
+
+        $response->assertRedirect('admin/courses');
+        $response->assertSessionHas('success');
+        Storage::disk()->assertExists($course->course_image);
 
         $this->assertEquals($course->course_title, 'Persius delenit has cu');
         $this->assertEquals($course->teacher_name, 'Teacher name');
@@ -49,7 +54,6 @@ class AddCourseTest extends TestCase
         $this->assertEquals($course->course_expire, '2018-08-08');
         $this->assertEquals($course->course_price, 150);
         $this->assertEquals($course->course_discount_price, 50);
-        $this->assertStringEndsWith('.jpg', $course->course_image);
         $this->assertEquals($course->course_video, 'https://www.youtube.com/watch?v=LDgd_gUcqCw');
         $this->assertEquals($course->course_description, 'Per consequat adolescens ex, cu nibh commune temporibus vim, ad sumo viris eloquentiam sed. Mea appareat omittantur eloquentiam ad, nam ei quas oportere democritum. Prima causae admodum id est, ei timeam inimicus sed. Sit an meis aliquam, cetero inermis vel ut. An sit illum euismod facilisis, tamquam vulputate pertinacia eum at.');
         $this->assertEquals($course->category_id, '1');
@@ -68,9 +72,9 @@ class AddCourseTest extends TestCase
 
     public function test_course_validated()
     {
-        $this->actingAs(User::find(2));
+        $this->actingAs(User::find(1));
 
-        $response = $this->post('dashboard/courses/store', []);
+        $response = $this->post('admin/courses/store', []);
 
         $response->assertSessionHasErrors('course_title');
         $response->assertSessionHasErrors('teacher_name');
